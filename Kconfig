@@ -16,3 +16,9 @@ config CONSTRUCTORS
  select CONFIG_CONSTRUCTORS
  ---help---
    Enable constructors.
+   
+config GCC_PLUGINS
+ tristate "Enable gcc plugins"
+ select CONFIG_GCC_PLUGINS
+ ---help---
+   Enable gcc plugins.
