@@ -52,8 +52,8 @@ unsigned native_patch(u8 type, u16 clobbers, void *ibuf,
 	switch(type) {
 		PATCH_SITE(pv_irq_ops, restore_fl);
 		PATCH_SITE(pv_irq_ops, save_fl);
-		PATCH_SITE(pv_irq_ops, irq_enable);
-		PATCH_SITE(pv_irq_ops, irq_disable);
+		/* PATCH_SITE(pv_irq_ops, irq_enable); */
+		/* PATCH_SITE(pv_irq_ops, irq_disable); */
 		PATCH_SITE(pv_cpu_ops, usergs_sysret64);
 		PATCH_SITE(pv_cpu_ops, swapgs);
 		PATCH_SITE(pv_mmu_ops, read_cr2);

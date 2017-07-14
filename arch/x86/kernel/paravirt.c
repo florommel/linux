@@ -315,14 +315,17 @@ struct pv_time_ops pv_time_ops = {
 __visible struct pv_irq_ops pv_irq_ops = {
 	.save_fl = __PV_IS_CALLEE_SAVE(native_save_fl),
 	.restore_fl = __PV_IS_CALLEE_SAVE(native_restore_fl),
-	.irq_disable = __PV_IS_CALLEE_SAVE(native_irq_disable),
-	.irq_enable = __PV_IS_CALLEE_SAVE(native_irq_enable),
+	/* .irq_disable = __PV_IS_CALLEE_SAVE(native_irq_disable), */
+	/* .irq_enable = __PV_IS_CALLEE_SAVE(native_irq_enable), */
 	.safe_halt = native_safe_halt,
 	.halt = native_halt,
 #ifdef CONFIG_X86_64
 	.adjust_exception_frame = paravirt_nop,
 #endif
 };
+
+__attribute__((multiverse)) void (*pv_irq_enable)(void) = native_irq_enable;
+__attribute__((multiverse)) void (*pv_irq_disable)(void) = native_irq_disable;
 
 __visible struct pv_cpu_ops pv_cpu_ops = {
 	.cpuid = native_cpuid,
@@ -471,3 +474,5 @@ EXPORT_SYMBOL    (pv_cpu_ops);
 EXPORT_SYMBOL    (pv_mmu_ops);
 EXPORT_SYMBOL_GPL(pv_info);
 EXPORT_SYMBOL    (pv_irq_ops);
+EXPORT_SYMBOL(pv_irq_enable);
+EXPORT_SYMBOL(pv_irq_disable);

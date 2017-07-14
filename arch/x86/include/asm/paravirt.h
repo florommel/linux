@@ -816,12 +816,12 @@ static inline notrace void arch_local_irq_restore(unsigned long f)
 
 static inline notrace void arch_local_irq_disable(void)
 {
-	PVOP_VCALLEE0(pv_irq_ops.irq_disable);
+	pv_irq_disable();
 }
 
 static inline notrace void arch_local_irq_enable(void)
 {
-	PVOP_VCALLEE0(pv_irq_ops.irq_enable);
+	pv_irq_enable();
 }
 
 static inline notrace unsigned long arch_local_irq_save(void)
@@ -918,17 +918,12 @@ extern void default_banner(void);
 	PARA_SITE(PARA_PATCH(pv_cpu_ops, PV_CPU_iret), CLBR_NONE,	\
 		  jmp PARA_INDIRECT(pv_cpu_ops+PV_CPU_iret))
 
-#define DISABLE_INTERRUPTS(clobbers)					\
-	PARA_SITE(PARA_PATCH(pv_irq_ops, PV_IRQ_irq_disable), clobbers, \
-		  PV_SAVE_REGS(clobbers | CLBR_CALLEE_SAVE);		\
-		  call PARA_INDIRECT(pv_irq_ops+PV_IRQ_irq_disable);	\
-		  PV_RESTORE_REGS(clobbers | CLBR_CALLEE_SAVE);)
+#define DISABLE_INTERRUPTS(clobbers)		\
+	call PARA_INDIRECT(pv_irq_disable);
 
-#define ENABLE_INTERRUPTS(clobbers)					\
-	PARA_SITE(PARA_PATCH(pv_irq_ops, PV_IRQ_irq_enable), clobbers,	\
-		  PV_SAVE_REGS(clobbers | CLBR_CALLEE_SAVE);		\
-		  call PARA_INDIRECT(pv_irq_ops+PV_IRQ_irq_enable);	\
-		  PV_RESTORE_REGS(clobbers | CLBR_CALLEE_SAVE);)
+#define ENABLE_INTERRUPTS(clobbers)		\
+	call PARA_INDIRECT(pv_irq_enable);
+
 
 #ifdef CONFIG_X86_32
 #define GET_CR0_INTO_EAX				\

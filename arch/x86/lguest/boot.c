@@ -58,6 +58,7 @@
 #include <linux/export.h>
 #include <linux/pci.h>
 #include <linux/virtio_pci.h>
+#include <linux/multiverse.h>
 #include <asm/acpi.h>
 #include <asm/apic.h>
 #include <asm/lguest.h>
@@ -581,14 +582,14 @@ static void lguest_write_cr4(unsigned long val)
  * Here's a diagram, where arrows indicate physical addresses:
  *
  * cr3 ---> +---------+
- *	    |  	   --------->+---------+
+ *	    |	   --------->+---------+
  *	    |	      |	     | PADDR1  |
  *	  Mid-level   |	     | PADDR2  |
- *	  (PMD) page  |	     | 	       |
+ *	  (PMD) page  |	     |	       |
  *	    |	      |	   Lower-level |
  *	    |	      |	   (PTE) page  |
  *	    |	      |	     |	       |
- *	      ....    	     	 ....
+ *	      ....		 ....
  *
  * So to convert a virtual address to a physical address, we look up the top
  * level, which points us to the second level, which gives us the physical
@@ -614,14 +615,14 @@ static void lguest_write_cr4(unsigned long val)
  *	   [   Level  ]
  *	   [  Entries ]
  *	   [(PUD Page)]---> +---------+
- *	 		    |  	   --------->+---------+
- *	 		    |	      |	     | PADDR1  |
- *	 		  Mid-level   |	     | PADDR2  |
- *	 		  (PMD) page  |	     | 	       |
- *	 		    |	      |	   Lower-level |
- *	 		    |	      |	   (PTE) page  |
- *	 		    |	      |	     |	       |
- *	 		      ....    	     	 ....
+ *			    |	   --------->+---------+
+ *			    |	      |	     | PADDR1  |
+ *			  Mid-level   |	     | PADDR2  |
+ *			  (PMD) page  |	     |	       |
+ *			    |	      |	   Lower-level |
+ *			    |	      |	   (PTE) page  |
+ *			    |	      |	     |	       |
+ *			      ....		 ....
  *
  *
  * And the virtual address is decoded as:
@@ -961,7 +962,7 @@ static struct clocksource lguest_clock = {
  * just applied the patch.
  */
 static int lguest_clockevent_set_next_event(unsigned long delta,
-                                           struct clock_event_device *evt)
+					   struct clock_event_device *evt)
 {
 	/* FIXME: I don't think this can ever happen, but James tells me he had
 	 * to put this code in.  Maybe we should remove it now.  Anyone? */
@@ -1351,7 +1352,7 @@ static const struct lguest_insns
 {
 	const char *start, *end;
 } lguest_insns[] = {
-	[PARAVIRT_PATCH(pv_irq_ops.irq_disable)] = { lgstart_cli, lgend_cli },
+	/* [PARAVIRT_PATCH(pv_irq_ops.irq_disable)] = { lgstart_cli, lgend_cli }, */
 	[PARAVIRT_PATCH(pv_irq_ops.save_fl)] = { lgstart_pushf, lgend_pushf },
 };
 
@@ -1402,9 +1403,12 @@ __init void lguest_init(void)
 	/* Interrupt-related operations */
 	pv_irq_ops.save_fl = PV_CALLEE_SAVE(lguest_save_fl);
 	pv_irq_ops.restore_fl = __PV_IS_CALLEE_SAVE(lg_restore_fl);
-	pv_irq_ops.irq_disable = PV_CALLEE_SAVE(lguest_irq_disable);
-	pv_irq_ops.irq_enable = __PV_IS_CALLEE_SAVE(lg_irq_enable);
 	pv_irq_ops.safe_halt = lguest_safe_halt;
+
+	pv_irq_enable = lg_irq_enable;
+	pv_irq_disable = lguest_irq_disable;
+	multiverse_commit_fn(&pv_irq_enable);
+	multiverse_commit_fn(&pv_irq_disable);
 
 	/* Setup operations */
 	pv_init_ops.patch = lguest_patch;

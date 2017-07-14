@@ -33,6 +33,7 @@
 #include <linux/memblock.h>
 #include <linux/edd.h>
 #include <linux/frame.h>
+#include <linux/multiverse.h>
 
 #include <xen/xen.h>
 #include <xen/events.h>
@@ -975,9 +976,12 @@ void __ref xen_setup_vcpu_info_placement(void)
 	if (xen_have_vcpu_info_placement) {
 		pv_irq_ops.save_fl = __PV_IS_CALLEE_SAVE(xen_save_fl_direct);
 		pv_irq_ops.restore_fl = __PV_IS_CALLEE_SAVE(xen_restore_fl_direct);
-		pv_irq_ops.irq_disable = __PV_IS_CALLEE_SAVE(xen_irq_disable_direct);
-		pv_irq_ops.irq_enable = __PV_IS_CALLEE_SAVE(xen_irq_enable_direct);
 		pv_mmu_ops.read_cr2 = xen_read_cr2_direct;
+
+		pv_irq_disable = xen_irq_disable_direct;
+		pv_irq_enable = xen_irq_enable_direct;
+		multiverse_commit_fn(&pv_irq_disable);
+		multiverse_commit_fn(&pv_irq_enable);
 	}
 }
 
@@ -999,8 +1003,8 @@ static unsigned xen_patch(u8 type, u16 clobbers, void *insnbuf,
 	goto patch_site
 
 	switch (type) {
-		SITE(pv_irq_ops, irq_enable);
-		SITE(pv_irq_ops, irq_disable);
+		/* SITE(pv_irq_ops, irq_enable); */
+		/* SITE(pv_irq_ops, irq_disable); */
 		SITE(pv_irq_ops, save_fl);
 		SITE(pv_irq_ops, restore_fl);
 #undef SITE

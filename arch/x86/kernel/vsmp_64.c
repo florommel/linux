@@ -17,6 +17,7 @@
 #include <linux/pci_regs.h>
 #include <linux/smp.h>
 #include <linux/irq.h>
+#include <linux/multiverse.h>
 
 #include <asm/apic.h>
 #include <asm/pci-direct.h>
@@ -76,8 +77,8 @@ static unsigned __init vsmp_patch(u8 type, u16 clobbers, void *ibuf,
 				  unsigned long addr, unsigned len)
 {
 	switch (type) {
-	case PARAVIRT_PATCH(pv_irq_ops.irq_enable):
-	case PARAVIRT_PATCH(pv_irq_ops.irq_disable):
+	/* case PARAVIRT_PATCH(pv_irq_ops.irq_enable): */
+	/* case PARAVIRT_PATCH(pv_irq_ops.irq_disable): */
 	case PARAVIRT_PATCH(pv_irq_ops.save_fl):
 	case PARAVIRT_PATCH(pv_irq_ops.restore_fl):
 		return paravirt_patch_default(type, clobbers, ibuf, addr, len);
@@ -117,8 +118,11 @@ static void __init set_vsmp_pv_ops(void)
 
 	if (cap & ctl & (1 << 4)) {
 		/* Setup irq ops and turn on vSMP  IRQ fastpath handling */
-		pv_irq_ops.irq_disable = PV_CALLEE_SAVE(vsmp_irq_disable);
-		pv_irq_ops.irq_enable  = PV_CALLEE_SAVE(vsmp_irq_enable);
+		pv_irq_disable = vsmp_irq_disable;
+		pv_irq_enable = vsmp_irq_enable;
+		multiverse_commit_fn(&pv_irq_disable);
+		multiverse_commit_fn(&pv_irq_enable);
+
 		pv_irq_ops.save_fl  = PV_CALLEE_SAVE(vsmp_save_fl);
 		pv_irq_ops.restore_fl  = PV_CALLEE_SAVE(vsmp_restore_fl);
 		pv_init_ops.patch = vsmp_patch;

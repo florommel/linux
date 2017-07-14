@@ -190,8 +190,8 @@ struct pv_irq_ops {
 	 */
 	struct paravirt_callee_save save_fl;
 	struct paravirt_callee_save restore_fl;
-	struct paravirt_callee_save irq_disable;
-	struct paravirt_callee_save irq_enable;
+	/* struct paravirt_callee_save irq_disable; */
+	/* struct paravirt_callee_save irq_enable; */
 
 	void (*safe_halt)(void);
 	void (*halt)(void);
@@ -200,6 +200,9 @@ struct pv_irq_ops {
 	void (*adjust_exception_frame)(void);
 #endif
 };
+
+extern __attribute__((multiverse)) void (*pv_irq_enable)(void);
+extern __attribute__((multiverse)) void (*pv_irq_disable)(void);
 
 struct pv_mmu_ops {
 	unsigned long (*read_cr2)(void);
@@ -690,7 +693,7 @@ u64 _paravirt_ident_64(u64);
 
 /* These all sit in the .parainstructions section to tell us what to patch. */
 struct paravirt_patch_site {
-	u8 *instr; 		/* original instructions */
+	u8 *instr;		/* original instructions */
 	u8 instrtype;		/* type of this instruction */
 	u8 len;			/* length of original instruction */
 	u16 clobbers;		/* what registers you may clobber */

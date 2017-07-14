@@ -88,6 +88,7 @@
 #include <linux/io.h>
 #include <linux/cache.h>
 #include <linux/rodata_test.h>
+#include <linux/multiverse.h>
 
 #include <asm/io.h>
 #include <asm/bugs.h>
@@ -981,6 +982,9 @@ static int __ref kernel_init(void *unused)
 	int ret;
 
 	kernel_init_freeable();
+	multiverse_init();
+	multiverse_commit();
+
 	/* need to finish all async __init code before freeing the memory */
 	async_synchronize_full();
 	ftrace_free_init_mem();
