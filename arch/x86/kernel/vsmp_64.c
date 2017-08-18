@@ -120,8 +120,6 @@ static void __init set_vsmp_pv_ops(void)
 		/* Setup irq ops and turn on vSMP  IRQ fastpath handling */
 		pv_irq_disable = vsmp_irq_disable;
 		pv_irq_enable = vsmp_irq_enable;
-		multiverse_commit_fn(&pv_irq_disable);
-		multiverse_commit_fn(&pv_irq_enable);
 
 		pv_irq_ops.save_fl  = PV_CALLEE_SAVE(vsmp_save_fl);
 		pv_irq_ops.restore_fl  = PV_CALLEE_SAVE(vsmp_restore_fl);

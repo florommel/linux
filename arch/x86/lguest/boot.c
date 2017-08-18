@@ -1407,8 +1407,6 @@ __init void lguest_init(void)
 
 	pv_irq_enable = lg_irq_enable;
 	pv_irq_disable = lguest_irq_disable;
-	multiverse_commit_fn(&pv_irq_enable);
-	multiverse_commit_fn(&pv_irq_disable);
 
 	/* Setup operations */
 	pv_init_ops.patch = lguest_patch;

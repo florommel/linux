@@ -974,14 +974,17 @@ void __ref xen_setup_vcpu_info_placement(void)
 	 * percpu area for all cpus, so make use of it.
 	 */
 	if (xen_have_vcpu_info_placement) {
+		extern void xen_irq_enable(void);
+		extern void xen_irq_disable(void);
+
 		pv_irq_ops.save_fl = __PV_IS_CALLEE_SAVE(xen_save_fl_direct);
 		pv_irq_ops.restore_fl = __PV_IS_CALLEE_SAVE(xen_restore_fl_direct);
 		pv_mmu_ops.read_cr2 = xen_read_cr2_direct;
 
-		pv_irq_disable = xen_irq_disable_direct;
-		pv_irq_enable = xen_irq_enable_direct;
-		multiverse_commit_fn(&pv_irq_disable);
-		multiverse_commit_fn(&pv_irq_enable);
+		pv_irq_disable = xen_irq_disable;
+		pv_irq_enable = xen_irq_enable;
+		/* multiverse_commit_fn(&pv_irq_disable); */
+		/* multiverse_commit_fn(&pv_irq_enable); */
 	}
 }
 
