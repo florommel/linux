@@ -918,11 +918,15 @@ extern void default_banner(void);
 	PARA_SITE(PARA_PATCH(pv_cpu_ops, PV_CPU_iret), CLBR_NONE,	\
 		  jmp PARA_INDIRECT(pv_cpu_ops+PV_CPU_iret))
 
-#define DISABLE_INTERRUPTS(clobbers)		\
-	call PARA_INDIRECT(pv_irq_disable);
+#define DISABLE_INTERRUPTS(clobbers)			\
+	PV_SAVE_REGS(clobbers | CLBR_CALLEE_SAVE);	\
+	call PARA_INDIRECT(pv_irq_disable);		\
+	PV_RESTORE_REGS(clobbers | CLBR_CALLEE_SAVE);
 
-#define ENABLE_INTERRUPTS(clobbers)		\
-	call PARA_INDIRECT(pv_irq_enable);
+#define ENABLE_INTERRUPTS(clobbers)			\
+	PV_SAVE_REGS(clobbers | CLBR_CALLEE_SAVE);	\
+	call PARA_INDIRECT(pv_irq_enable);		\
+	PV_RESTORE_REGS(clobbers | CLBR_CALLEE_SAVE);
 
 
 #ifdef CONFIG_X86_32
