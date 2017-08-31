@@ -67,7 +67,8 @@
 
 #ifdef CONFIG_DEBUG_SPINLOCK
 #define SMSC_ASSERT_MAC_LOCK(pdata) \
-		WARN_ON_SMP(!spin_is_locked(&pdata->mac_lock))
+		WARN_ON_SMP(!mv_uniprocessor_locks && \
+			    !spin_is_locked(&pdata->mac_lock))
 #else
 #define SMSC_ASSERT_MAC_LOCK(pdata) do {} while (0)
 #endif				/* CONFIG_DEBUG_SPINLOCK */
@@ -212,7 +213,7 @@
 #define HW_CFG_PHY_CLK_SEL_INT_PHY_	0x00000000
 #define HW_CFG_PHY_CLK_SEL_EXT_PHY_	0x00000020
 #define HW_CFG_PHY_CLK_SEL_CLK_DIS_	0x00000040
-#define HW_CFG_SMI_SEL_		 	0x00000010
+#define HW_CFG_SMI_SEL_			0x00000010
 #define HW_CFG_EXT_PHY_DET_		0x00000008
 #define HW_CFG_EXT_PHY_EN_		0x00000004
 #define HW_CFG_SRST_TO_			0x00000002
