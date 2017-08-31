@@ -58,20 +58,23 @@
 #include <asm/barrier.h>
 
 
+extern __attribute__((multiverse)) bool mv_uniprocessor_locks;
+
+
 /*
  * Must define these before including other files, inline functions need them
  */
 #define LOCK_SECTION_NAME ".text..lock."KBUILD_BASENAME
 
 #define LOCK_SECTION_START(extra)               \
-        ".subsection 1\n\t"                     \
-        extra                                   \
-        ".ifndef " LOCK_SECTION_NAME "\n\t"     \
-        LOCK_SECTION_NAME ":\n\t"               \
-        ".endif\n"
+	".subsection 1\n\t"                     \
+	extra                                   \
+	".ifndef " LOCK_SECTION_NAME "\n\t"     \
+	LOCK_SECTION_NAME ":\n\t"               \
+	".endif\n"
 
 #define LOCK_SECTION_END                        \
-        ".previous\n\t"
+	".previous\n\t"
 
 #define __lockfunc __attribute__((section(".spinlock.text")))
 

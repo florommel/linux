@@ -15,30 +15,44 @@
  * Released under the General Public License (GPL).
  */
 
-void __lockfunc _raw_read_lock(rwlock_t *lock)		__acquires(lock);
-void __lockfunc _raw_write_lock(rwlock_t *lock)		__acquires(lock);
-void __lockfunc _raw_read_lock_bh(rwlock_t *lock)	__acquires(lock);
-void __lockfunc _raw_write_lock_bh(rwlock_t *lock)	__acquires(lock);
-void __lockfunc _raw_read_lock_irq(rwlock_t *lock)	__acquires(lock);
-void __lockfunc _raw_write_lock_irq(rwlock_t *lock)	__acquires(lock);
-unsigned long __lockfunc _raw_read_lock_irqsave(rwlock_t *lock)
-							__acquires(lock);
-unsigned long __lockfunc _raw_write_lock_irqsave(rwlock_t *lock)
-							__acquires(lock);
-int __lockfunc _raw_read_trylock(rwlock_t *lock);
-int __lockfunc _raw_write_trylock(rwlock_t *lock);
-void __lockfunc _raw_read_unlock(rwlock_t *lock)	__releases(lock);
-void __lockfunc _raw_write_unlock(rwlock_t *lock)	__releases(lock);
-void __lockfunc _raw_read_unlock_bh(rwlock_t *lock)	__releases(lock);
-void __lockfunc _raw_write_unlock_bh(rwlock_t *lock)	__releases(lock);
-void __lockfunc _raw_read_unlock_irq(rwlock_t *lock)	__releases(lock);
-void __lockfunc _raw_write_unlock_irq(rwlock_t *lock)	__releases(lock);
-void __lockfunc
+void __lockfunc __attribute__((multiverse))
+_raw_read_lock(rwlock_t *lock)		__acquires(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_write_lock(rwlock_t *lock)		__acquires(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_read_lock_bh(rwlock_t *lock)	__acquires(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_write_lock_bh(rwlock_t *lock)	__acquires(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_read_lock_irq(rwlock_t *lock)	__acquires(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_write_lock_irq(rwlock_t *lock)	__acquires(lock);
+unsigned long __lockfunc __attribute__((multiverse))
+_raw_read_lock_irqsave(rwlock_t *lock)	__acquires(lock);
+unsigned long __lockfunc __attribute__((multiverse))
+_raw_write_lock_irqsave(rwlock_t *lock)	__acquires(lock);
+int __lockfunc __attribute__((multiverse))
+_raw_read_trylock(rwlock_t *lock);
+int __lockfunc __attribute__((multiverse))
+_raw_write_trylock(rwlock_t *lock);
+void __lockfunc __attribute__((multiverse))
+_raw_read_unlock(rwlock_t *lock)	__releases(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_write_unlock(rwlock_t *lock)	__releases(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_read_unlock_bh(rwlock_t *lock)	__releases(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_write_unlock_bh(rwlock_t *lock)	__releases(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_read_unlock_irq(rwlock_t *lock)	__releases(lock);
+void __lockfunc __attribute__((multiverse))
+_raw_write_unlock_irq(rwlock_t *lock)	__releases(lock);
+void __lockfunc __attribute__((multiverse))
 _raw_read_unlock_irqrestore(rwlock_t *lock, unsigned long flags)
-							__releases(lock);
-void __lockfunc
+					__releases(lock);
+void __lockfunc __attribute__((multiverse))
 _raw_write_unlock_irqrestore(rwlock_t *lock, unsigned long flags)
-							__releases(lock);
+					__releases(lock);
 
 #ifdef CONFIG_INLINE_READ_LOCK
 #define _raw_read_lock(lock) __raw_read_lock(lock)

@@ -20,6 +20,7 @@
 #include <linux/interrupt.h>
 #include <linux/debug_locks.h>
 #include <linux/export.h>
+#include <linux/spinlock_api_up_basic.h>
 
 /*
  * If lockdep is enabled then we use the non-preemption spin-ops
@@ -129,226 +130,361 @@ BUILD_LOCK_OPS(write, rwlock);
 
 #endif
 
-#ifndef CONFIG_INLINE_SPIN_TRYLOCK
-int __lockfunc _raw_spin_trylock(raw_spinlock_t *lock)
+
+bool mv_uniprocessor_locks = false;
+EXPORT_SYMBOL(mv_uniprocessor_locks);
+
+
+void __attribute__((multiverse)) assert_raw_spin_locked(raw_spinlock_t *lock)
 {
-	return __raw_spin_trylock(lock);
+	if (!mv_uniprocessor_locks) {
+		BUG_ON(!raw_spin_is_locked(lock));
+	}
+}
+EXPORT_SYMBOL(assert_raw_spin_locked);
+
+#ifndef CONFIG_INLINE_SPIN_TRYLOCK
+int __lockfunc __attribute__((multiverse)) _raw_spin_trylock(raw_spinlock_t *lock)
+{
+	if (mv_uniprocessor_locks) {
+		__LOCK(lock);
+		return 1;
+	} else {
+		return __raw_spin_trylock(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_trylock);
 #endif
 
 #ifndef CONFIG_INLINE_SPIN_TRYLOCK_BH
-int __lockfunc _raw_spin_trylock_bh(raw_spinlock_t *lock)
+int __lockfunc __attribute__((multiverse)) _raw_spin_trylock_bh(raw_spinlock_t *lock)
 {
-	return __raw_spin_trylock_bh(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK_BH(lock);
+		return 1;
+	} else {
+		return __raw_spin_trylock_bh(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_trylock_bh);
 #endif
 
 #ifndef CONFIG_INLINE_SPIN_LOCK
-void __lockfunc _raw_spin_lock(raw_spinlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_spin_lock(raw_spinlock_t *lock)
 {
-	__raw_spin_lock(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK(lock);
+	} else {
+		__raw_spin_lock(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_lock);
 #endif
 
 #ifndef CONFIG_INLINE_SPIN_LOCK_IRQSAVE
-unsigned long __lockfunc _raw_spin_lock_irqsave(raw_spinlock_t *lock)
+unsigned long __lockfunc __attribute__((multiverse)) _raw_spin_lock_irqsave(raw_spinlock_t *lock)
 {
-	return __raw_spin_lock_irqsave(lock);
+	if (mv_uniprocessor_locks) {
+		unsigned long flags;
+		__LOCK_IRQSAVE(lock, flags);
+		return flags;
+	} else {
+		return __raw_spin_lock_irqsave(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_lock_irqsave);
 #endif
 
 #ifndef CONFIG_INLINE_SPIN_LOCK_IRQ
-void __lockfunc _raw_spin_lock_irq(raw_spinlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_spin_lock_irq(raw_spinlock_t *lock)
 {
-	__raw_spin_lock_irq(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK_IRQ(lock);
+	} else {
+		__raw_spin_lock_irq(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_lock_irq);
 #endif
 
 #ifndef CONFIG_INLINE_SPIN_LOCK_BH
-void __lockfunc _raw_spin_lock_bh(raw_spinlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_spin_lock_bh(raw_spinlock_t *lock)
 {
-	__raw_spin_lock_bh(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK_BH(lock);
+	} else {
+		__raw_spin_lock_bh(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_lock_bh);
 #endif
 
 #ifdef CONFIG_UNINLINE_SPIN_UNLOCK
-void __lockfunc _raw_spin_unlock(raw_spinlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_spin_unlock(raw_spinlock_t *lock)
 {
-	__raw_spin_unlock(lock);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK(lock);
+	} else {
+		__raw_spin_unlock(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_unlock);
 #endif
 
 #ifndef CONFIG_INLINE_SPIN_UNLOCK_IRQRESTORE
-void __lockfunc _raw_spin_unlock_irqrestore(raw_spinlock_t *lock, unsigned long flags)
+void __lockfunc __attribute__((multiverse)) _raw_spin_unlock_irqrestore(raw_spinlock_t *lock, unsigned long flags)
 {
-	__raw_spin_unlock_irqrestore(lock, flags);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK_IRQRESTORE(lock, flags);
+	} else {
+		__raw_spin_unlock_irqrestore(lock, flags);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_unlock_irqrestore);
 #endif
 
 #ifndef CONFIG_INLINE_SPIN_UNLOCK_IRQ
-void __lockfunc _raw_spin_unlock_irq(raw_spinlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_spin_unlock_irq(raw_spinlock_t *lock)
 {
-	__raw_spin_unlock_irq(lock);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK_IRQ(lock);
+	} else {
+		__raw_spin_unlock_irq(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_unlock_irq);
 #endif
 
 #ifndef CONFIG_INLINE_SPIN_UNLOCK_BH
-void __lockfunc _raw_spin_unlock_bh(raw_spinlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_spin_unlock_bh(raw_spinlock_t *lock)
 {
-	__raw_spin_unlock_bh(lock);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK_BH(lock);
+	} else {
+		__raw_spin_unlock_bh(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_spin_unlock_bh);
 #endif
 
 #ifndef CONFIG_INLINE_READ_TRYLOCK
-int __lockfunc _raw_read_trylock(rwlock_t *lock)
+int __lockfunc __attribute__((multiverse)) _raw_read_trylock(rwlock_t *lock)
 {
-	return __raw_read_trylock(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK(lock);
+		return 1;
+	} else {
+		return __raw_read_trylock(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_read_trylock);
 #endif
 
 #ifndef CONFIG_INLINE_READ_LOCK
-void __lockfunc _raw_read_lock(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_read_lock(rwlock_t *lock)
 {
-	__raw_read_lock(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK(lock);
+	} else {
+		__raw_read_lock(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_read_lock);
 #endif
 
 #ifndef CONFIG_INLINE_READ_LOCK_IRQSAVE
-unsigned long __lockfunc _raw_read_lock_irqsave(rwlock_t *lock)
+unsigned long __lockfunc __attribute__((multiverse)) _raw_read_lock_irqsave(rwlock_t *lock)
 {
-	return __raw_read_lock_irqsave(lock);
+	if (mv_uniprocessor_locks) {
+		unsigned long flags;
+		__LOCK_IRQSAVE(lock, flags);
+		return flags;
+	} else {
+		return __raw_read_lock_irqsave(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_read_lock_irqsave);
 #endif
 
 #ifndef CONFIG_INLINE_READ_LOCK_IRQ
-void __lockfunc _raw_read_lock_irq(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_read_lock_irq(rwlock_t *lock)
 {
-	__raw_read_lock_irq(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK_IRQ(lock);
+	} else {
+		__raw_read_lock_irq(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_read_lock_irq);
 #endif
 
 #ifndef CONFIG_INLINE_READ_LOCK_BH
-void __lockfunc _raw_read_lock_bh(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_read_lock_bh(rwlock_t *lock)
 {
-	__raw_read_lock_bh(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK_BH(lock);
+	} else {
+		__raw_read_lock_bh(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_read_lock_bh);
 #endif
 
 #ifndef CONFIG_INLINE_READ_UNLOCK
-void __lockfunc _raw_read_unlock(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_read_unlock(rwlock_t *lock)
 {
-	__raw_read_unlock(lock);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK(lock);
+	} else {
+		__raw_read_unlock(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_read_unlock);
 #endif
 
 #ifndef CONFIG_INLINE_READ_UNLOCK_IRQRESTORE
-void __lockfunc _raw_read_unlock_irqrestore(rwlock_t *lock, unsigned long flags)
+void __lockfunc __attribute__((multiverse)) _raw_read_unlock_irqrestore(rwlock_t *lock, unsigned long flags)
 {
-	__raw_read_unlock_irqrestore(lock, flags);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK_IRQRESTORE(lock, flags);
+	} else {
+		__raw_read_unlock_irqrestore(lock, flags);
+	}
 }
 EXPORT_SYMBOL(_raw_read_unlock_irqrestore);
 #endif
 
 #ifndef CONFIG_INLINE_READ_UNLOCK_IRQ
-void __lockfunc _raw_read_unlock_irq(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_read_unlock_irq(rwlock_t *lock)
 {
-	__raw_read_unlock_irq(lock);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK_IRQ(lock);
+	} else {
+		__raw_read_unlock_irq(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_read_unlock_irq);
 #endif
 
 #ifndef CONFIG_INLINE_READ_UNLOCK_BH
-void __lockfunc _raw_read_unlock_bh(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_read_unlock_bh(rwlock_t *lock)
 {
-	__raw_read_unlock_bh(lock);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK_BH(lock);
+	} else {
+		__raw_read_unlock_bh(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_read_unlock_bh);
 #endif
 
 #ifndef CONFIG_INLINE_WRITE_TRYLOCK
-int __lockfunc _raw_write_trylock(rwlock_t *lock)
+int __lockfunc __attribute__((multiverse)) _raw_write_trylock(rwlock_t *lock)
 {
-	return __raw_write_trylock(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK(lock);
+		return 1;
+	} else {
+		return __raw_write_trylock(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_write_trylock);
 #endif
 
 #ifndef CONFIG_INLINE_WRITE_LOCK
-void __lockfunc _raw_write_lock(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_write_lock(rwlock_t *lock)
 {
-	__raw_write_lock(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK(lock);
+	} else {
+		__raw_write_lock(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_write_lock);
 #endif
 
 #ifndef CONFIG_INLINE_WRITE_LOCK_IRQSAVE
-unsigned long __lockfunc _raw_write_lock_irqsave(rwlock_t *lock)
+unsigned long __lockfunc __attribute__((multiverse)) _raw_write_lock_irqsave(rwlock_t *lock)
 {
-	return __raw_write_lock_irqsave(lock);
+	if (mv_uniprocessor_locks) {
+		unsigned long flags;
+		__LOCK_IRQSAVE(lock, flags);
+		return flags;
+	} else {
+		return __raw_write_lock_irqsave(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_write_lock_irqsave);
 #endif
 
 #ifndef CONFIG_INLINE_WRITE_LOCK_IRQ
-void __lockfunc _raw_write_lock_irq(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_write_lock_irq(rwlock_t *lock)
 {
-	__raw_write_lock_irq(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK_IRQ(lock);
+	} else {
+		__raw_write_lock_irq(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_write_lock_irq);
 #endif
 
 #ifndef CONFIG_INLINE_WRITE_LOCK_BH
-void __lockfunc _raw_write_lock_bh(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_write_lock_bh(rwlock_t *lock)
 {
-	__raw_write_lock_bh(lock);
+	if (mv_uniprocessor_locks) {
+		__LOCK_BH(lock);
+	} else {
+		__raw_write_lock_bh(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_write_lock_bh);
 #endif
 
 #ifndef CONFIG_INLINE_WRITE_UNLOCK
-void __lockfunc _raw_write_unlock(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_write_unlock(rwlock_t *lock)
 {
-	__raw_write_unlock(lock);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK(lock);
+	} else {
+		__raw_write_unlock(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_write_unlock);
 #endif
 
 #ifndef CONFIG_INLINE_WRITE_UNLOCK_IRQRESTORE
-void __lockfunc _raw_write_unlock_irqrestore(rwlock_t *lock, unsigned long flags)
+void __lockfunc __attribute__((multiverse)) _raw_write_unlock_irqrestore(rwlock_t *lock, unsigned long flags)
 {
-	__raw_write_unlock_irqrestore(lock, flags);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK_IRQRESTORE(lock, flags);
+	} else {
+		__raw_write_unlock_irqrestore(lock, flags);
+	}
 }
 EXPORT_SYMBOL(_raw_write_unlock_irqrestore);
 #endif
 
 #ifndef CONFIG_INLINE_WRITE_UNLOCK_IRQ
-void __lockfunc _raw_write_unlock_irq(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_write_unlock_irq(rwlock_t *lock)
 {
-	__raw_write_unlock_irq(lock);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK_IRQ(lock);
+	} else {
+		__raw_write_unlock_irq(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_write_unlock_irq);
 #endif
 
 #ifndef CONFIG_INLINE_WRITE_UNLOCK_BH
-void __lockfunc _raw_write_unlock_bh(rwlock_t *lock)
+void __lockfunc __attribute__((multiverse)) _raw_write_unlock_bh(rwlock_t *lock)
 {
-	__raw_write_unlock_bh(lock);
+	if (mv_uniprocessor_locks) {
+		__UNLOCK_BH(lock);
+	} else {
+		__raw_write_unlock_bh(lock);
+	}
 }
 EXPORT_SYMBOL(_raw_write_unlock_bh);
 #endif

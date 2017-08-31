@@ -11,6 +11,7 @@
 #include <linux/stop_machine.h>
 #include <linux/slab.h>
 #include <linux/kdebug.h>
+#include <linux/spinlock.h>
 #include <asm/text-patching.h>
 #include <asm/alternative.h>
 #include <asm/sections.h>
@@ -646,6 +647,13 @@ void __init alternative_instructions(void)
 		alternatives_smp_module_add(NULL, "core kernel",
 					    __smp_locks, __smp_locks_end,
 					    _text, _etext);
+
+		printk("Non SMP system");
+
+		/* Set the mv_uniprocessor_locks flag.  This is used to patch
+		 * the smp spinlocks/rwlocks on up systems via multiverse.
+		 */
+		mv_uniprocessor_locks = true;
 	}
 
 	if (!uniproc_patched || num_possible_cpus() == 1)
@@ -821,4 +829,3 @@ void *text_poke_bp(void *addr, const void *opcode, size_t len, void *handler)
 
 	return addr;
 }
-
