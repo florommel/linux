@@ -324,8 +324,20 @@ __visible struct pv_irq_ops pv_irq_ops = {
 #endif
 };
 
-__attribute__((multiverse)) void (*pv_irq_enable)(void) = native_irq_enable;
-__attribute__((multiverse)) void (*pv_irq_disable)(void) = native_irq_disable;
+
+asm("naked_irq_disable:	\n\
+	cli		\n\
+	retq");
+void naked_irq_disable(void);
+
+asm("naked_irq_enable:	\n\
+	sti		\n\
+	retq");
+void naked_irq_enable(void);
+
+__attribute__((multiverse)) void (*pv_irq_enable)(void) = naked_irq_enable;
+__attribute__((multiverse)) void (*pv_irq_disable)(void) = naked_irq_disable;
+
 
 __visible struct pv_cpu_ops pv_cpu_ops = {
 	.cpuid = native_cpuid,
