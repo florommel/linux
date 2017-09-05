@@ -648,12 +648,13 @@ void __init alternative_instructions(void)
 					    __smp_locks, __smp_locks_end,
 					    _text, _etext);
 
-		printk("Non SMP system");
-
-		/* Set the mv_uniprocessor_locks flag.  This is used to patch
-		 * the smp spinlocks/rwlocks on up systems via multiverse.
-		 */
-		mv_uniprocessor_locks = true;
+		if (num_possible_cpus() == 1) {
+			/* Set the mv_uniprocessor_locks flag.
+			 * This is used to patch the smp spinlocks/rwlocks
+			 * on up systems via multiverse. */
+			printk("Set multiverse uniprocessor locks.");
+			mv_uniprocessor_locks = true;
+		}
 	}
 
 	if (!uniproc_patched || num_possible_cpus() == 1)
